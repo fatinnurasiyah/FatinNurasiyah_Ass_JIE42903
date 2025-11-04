@@ -2,6 +2,7 @@ import streamlit as st
 import csv
 import random
 import os
+import pandas as pd
 
 def read_csv_to_dict(file_path):
     program_ratings = {}
@@ -30,13 +31,13 @@ st.title("📺 TV Program Scheduling using Genetic Algorithm (GA)")
 st.sidebar.header("Set GA Parameters for Each Trial")
 
 trials = []
-for i in range(1, 3 + 1):
+for i in range(1, 4):
     st.sidebar.subheader(f"Trial {i}")
     co_r = round(
         st.sidebar.slider(
             f"Trial {i} - Crossover Rate (CO_R)",
             0.0, 0.95,  # range
-            0.8,        # default value
+            0.8,        # default
             step=0.1
         ),
         1
@@ -45,7 +46,7 @@ for i in range(1, 3 + 1):
         st.sidebar.slider(
             f"Trial {i} - Mutation Rate (MUT_R)",
             0.01, 0.05,  # range
-            0.02,        # default value
+            0.02,        # default
             step=0.01
         ),
         2
@@ -57,7 +58,7 @@ POP = 50
 EL_S = 2
 
 all_programs = list(ratings.keys())
-all_time_slots = list(range(6, 24))
+all_time_slots = list(range(6, 24))  # 6AM to 23PM
 
 def fitness_function(schedule):
     total_rating = 0
@@ -107,19 +108,28 @@ def genetic_algorithm(initial_schedule, generations=GEN, population_size=POP, cr
     return population[0]
 
 if st.button("▶️ Run 3 Trials"):
-    for i, (CO_R, MUT_R) in enumerate(trials, start=1):
-        st.subheader(f"🧪 Trial {i}")
-        st.write(f"**Parameters:** Crossover Rate = {CO_R:.1f}, Mutation Rate = {MUT_R:.2f}")
+    cols = st.columns(3)  # 3 trials side-by-side
 
-        initial_schedule = list(all_programs)
-        random.shuffle(initial_schedule)
-        best_schedule = genetic_algorithm(initial_schedule, crossover_rate=CO_R, mutation_rate=MUT_R)
+    for i, (CO_R, MUT_R) in enumerate(trials):
+        with cols[i]:
+            st.subheader(f"🧪 Trial {i+1}")
+            st.write(f"**Parameters:** Crossover Rate = {CO_R:.1f}, Mutation Rate = {MUT_R:.2f}")
 
-        table_data = {"Time Slot": [], "Program": []}
-        for j, program in enumerate(best_schedule[:len(all_time_slots)]):
-            table_data["Time Slot"].append(f"{all_time_slots[j]}:00")
-            table_data["Program"].append(program)
+            initial_schedule = list(all_programs)
+            random.shuffle(initial_schedule)
+            best_schedule = genetic_algorithm(initial_schedule, crossover_rate=CO_R, mutation_rate=MUT_R)
 
-        st.table(table_data)
-        st.success(f"Total Ratings: {fitness_function(best_schedule):.2f}")
-        st.markdown("---")
+            # Prepare DataFrame for table
+            df = pd.DataFrame({
+                "Time Slot": [f"{h}:00" for h in all_time_slots],
+                "Program": best_schedule[:len(all_time_slots)],
+                "Rating": [ratings[best_schedule[j]][j % len(ratings[best_schedule[j]])] for j in range(len(all_time_slots))]
+            })
+
+            # Highlight highest rating program per trial
+            def highlight_max(s):
+                return ['background-color: lightgreen; font-weight: bold' if v == s.max() else '' for v in s]
+
+            st.dataframe(df.style.apply(highlight_max, subset=['Rating'], axis=0), height=500)
+            st.success(f"Total Ratings: {fitness_function(best_schedule):.2f}")
+
