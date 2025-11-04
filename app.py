@@ -1,6 +1,7 @@
 import streamlit as st
 import csv
 import random
+import os
 
 def read_csv_to_dict(file_path):
     program_ratings = {}
@@ -13,8 +14,17 @@ def read_csv_to_dict(file_path):
             program_ratings[program] = ratings
     return program_ratings
 
-import os
-ratings = read_csv_to_dict(os.path.join(os.path.dirname(__file__), "program_ratings_modified.csv"))
+file_path = os.path.join(os.path.dirname(__file__), "program_ratings_modified.csv")
+
+st.write("Looking for:", file_path)
+st.write("Exists?", os.path.exists(file_path))
+
+if os.path.exists(file_path):
+    ratings = read_csv_to_dict(file_path)
+else:
+    st.error("❌ CSV file 'program_ratings_modified.csv' not found! Please upload it to the same folder as app.py.")
+    st.stop()
+
 
 st.title("📺 TV Program Scheduling using Genetic Algorithm")
 
@@ -27,7 +37,7 @@ POP = 50
 EL_S = 2
 
 all_programs = list(ratings.keys())
-all_time_slots = list(range(6, 24))
+all_time_slots = list(range(6, 24))  # 6 AM to 11 PM
 
 def fitness_function(schedule):
     total_rating = 0
@@ -35,11 +45,13 @@ def fitness_function(schedule):
         total_rating += ratings[program][time_slot % len(ratings[program])]
     return total_rating
 
+
 def crossover(schedule1, schedule2):
     crossover_point = random.randint(1, len(schedule1) - 2)
     child1 = schedule1[:crossover_point] + schedule2[crossover_point:]
     child2 = schedule2[:crossover_point] + schedule1[crossover_point:]
     return child1, child2
+
 
 def mutate(schedule):
     mutation_point = random.randint(0, len(schedule) - 1)
@@ -47,7 +59,9 @@ def mutate(schedule):
     schedule[mutation_point] = new_program
     return schedule
 
-def genetic_algorithm(initial_schedule, generations=GEN, population_size=POP, crossover_rate=CO_R, mutation_rate=MUT_R, elitism_size=EL_S):
+
+def genetic_algorithm(initial_schedule, generations=GEN, population_size=POP,
+                      crossover_rate=CO_R, mutation_rate=MUT_R, elitism_size=EL_S):
     population = [initial_schedule]
     for _ in range(population_size - 1):
         random_schedule = initial_schedule.copy()
@@ -88,4 +102,4 @@ if st.button("Run Genetic Algorithm"):
         table_data["Program"].append(program)
     
     st.table(table_data)
-    st.success(f"Total Ratings: {fitness_function(best_schedule):.2f}")
+    st.success(f"✅ Total Ratings: {fitness_function(best_schedule):.2f}")
