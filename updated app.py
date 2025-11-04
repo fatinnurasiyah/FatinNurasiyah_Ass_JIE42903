@@ -14,7 +14,7 @@ def read_csv_to_dict(file_path):
             program_ratings[program] = ratings
     return program_ratings
 
-csv_path = os.path.join(os.path.dirname(__file__), "program_ratings_modified.csv")
+csv_path = os.path.join(os.path.dirname(__file__), "program_ratings_modified_csv.csv")
 st.write(f"Looking for: {csv_path}")
 if not os.path.exists(csv_path):
     st.error("❌ CSV file 'program_ratings_modified.csv' not found! Please upload it to the same folder as app.py.")
@@ -106,3 +106,4 @@ if st.button("▶️ Run 3 Trials"):
         st.table(table_data)
         st.success(f"Total Ratings: {fitness_function(best_schedule):.2f}")
         st.markdown("---")
+
