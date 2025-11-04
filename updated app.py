@@ -30,13 +30,13 @@ st.title("📺 TV Program Scheduling using Genetic Algorithm (GA)")
 st.sidebar.header("Set GA Parameters for Each Trial")
 
 trials = []
-for i in range(1, 4):
+for i in range(1, 3 + 1):
     st.sidebar.subheader(f"Trial {i}")
     co_r = round(
         st.sidebar.slider(
             f"Trial {i} - Crossover Rate (CO_R)",
-            0.0, 0.95,
-            0.8 if i == 1 else 0.6 if i == 2 else 0.9,
+            0.0, 0.95,  # range
+            0.8,        # default value
             step=0.1
         ),
         1
@@ -44,11 +44,11 @@ for i in range(1, 4):
     mut_r = round(
         st.sidebar.slider(
             f"Trial {i} - Mutation Rate (MUT_R)",
-            0.01, 0.1,
-            0.02 if i == 1 else 0.05 if i == 2 else 0.03,
+            0.01, 0.05,  # range
+            0.02,        # default value
             step=0.01
         ),
-        1
+        2
     )
     trials.append((co_r, mut_r))
 
@@ -109,7 +109,7 @@ def genetic_algorithm(initial_schedule, generations=GEN, population_size=POP, cr
 if st.button("▶️ Run 3 Trials"):
     for i, (CO_R, MUT_R) in enumerate(trials, start=1):
         st.subheader(f"🧪 Trial {i}")
-        st.write(f"**Parameters:** Crossover Rate = {CO_R:.1f}, Mutation Rate = {MUT_R:.1f}")
+        st.write(f"**Parameters:** Crossover Rate = {CO_R:.1f}, Mutation Rate = {MUT_R:.2f}")
 
         initial_schedule = list(all_programs)
         random.shuffle(initial_schedule)
@@ -123,6 +123,3 @@ if st.button("▶️ Run 3 Trials"):
         st.table(table_data)
         st.success(f"Total Ratings: {fitness_function(best_schedule):.2f}")
         st.markdown("---")
-
-
-
