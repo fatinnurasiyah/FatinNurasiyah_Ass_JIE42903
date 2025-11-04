@@ -14,7 +14,7 @@ def read_csv_to_dict(file_path):
             program_ratings[program] = ratings
     return program_ratings
 
-file_path = os.path.join(os.path.dirname(__file__), "program_ratings_modified.csv")
+file_path = os.path.join(os.path.dirname(__file__), "program_ratings_modified.csv.csv")
 
 st.write("Looking for:", file_path)
 st.write("Exists?", os.path.exists(file_path))
@@ -103,3 +103,4 @@ if st.button("Run Genetic Algorithm"):
     
     st.table(table_data)
     st.success(f"✅ Total Ratings: {fitness_function(best_schedule):.2f}")
+
