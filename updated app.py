@@ -16,6 +16,7 @@ def read_csv_to_dict(file_path):
 
 csv_path = os.path.join(os.path.dirname(__file__), "program_ratings_modified.csv.csv")
 st.write(f"Looking for: {csv_path}")
+
 if not os.path.exists(csv_path):
     st.error("❌ CSV file 'program_ratings_modified.csv' not found! Please upload it to the same folder as app.py.")
     st.stop()
@@ -24,15 +25,31 @@ else:
 
 ratings = read_csv_to_dict(csv_path)
 
-st.title("📺 TV Program Scheduling using Genetic Algorithm (GA) ")
+st.title("📺 TV Program Scheduling using Genetic Algorithm (GA)")
 
 st.sidebar.header("Set GA Parameters for Each Trial")
 
 trials = []
 for i in range(1, 4):
     st.sidebar.subheader(f"Trial {i}")
-    co_r = st.sidebar.slider(f"Trial {i} - Crossover Rate (CO_R)", 0.0, 0.95, 0.8 if i == 1 else 0.6 if i == 2 else 0.9)
-    mut_r = st.sidebar.slider(f"Trial {i} - Mutation Rate (MUT_R)", 0.01, 0.1, 0.02 if i == 1 else 0.05 if i == 2 else 0.03)
+    co_r = round(
+        st.sidebar.slider(
+            f"Trial {i} - Crossover Rate (CO_R)",
+            0.0, 0.95,
+            0.8 if i == 1 else 0.6 if i == 2 else 0.9,
+            step=0.1
+        ),
+        1
+    )
+    mut_r = round(
+        st.sidebar.slider(
+            f"Trial {i} - Mutation Rate (MUT_R)",
+            0.01, 0.1,
+            0.02 if i == 1 else 0.05 if i == 2 else 0.03,
+            step=0.01
+        ),
+        1
+    )
     trials.append((co_r, mut_r))
 
 GEN = 100
@@ -92,19 +109,20 @@ def genetic_algorithm(initial_schedule, generations=GEN, population_size=POP, cr
 if st.button("▶️ Run 3 Trials"):
     for i, (CO_R, MUT_R) in enumerate(trials, start=1):
         st.subheader(f"🧪 Trial {i}")
-        st.write(f"**Parameters:** Crossover Rate = {CO_R}, Mutation Rate = {MUT_R}")
+        st.write(f"**Parameters:** Crossover Rate = {CO_R:.1f}, Mutation Rate = {MUT_R:.1f}")
 
         initial_schedule = list(all_programs)
         random.shuffle(initial_schedule)
         best_schedule = genetic_algorithm(initial_schedule, crossover_rate=CO_R, mutation_rate=MUT_R)
 
         table_data = {"Time Slot": [], "Program": []}
-        for i, program in enumerate(best_schedule[:len(all_time_slots)]):
-            table_data["Time Slot"].append(f"{all_time_slots[i]}:00")
+        for j, program in enumerate(best_schedule[:len(all_time_slots)]):
+            table_data["Time Slot"].append(f"{all_time_slots[j]}:00")
             table_data["Program"].append(program)
-        
+
         st.table(table_data)
         st.success(f"Total Ratings: {fitness_function(best_schedule):.2f}")
         st.markdown("---")
+
 
 
