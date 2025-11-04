@@ -26,7 +26,7 @@ else:
     st.stop()
 
 
-st.title("📺 TV Program Scheduling using Genetic Algorithm")
+st.title("📺 TV Program Scheduling using Genetic Algorithm (GA)")
 
 st.sidebar.header("Adjust GA Parameters")
 CO_R = st.sidebar.slider("Crossover Rate (CO_R)", 0.0, 0.95, 0.8)
@@ -103,4 +103,5 @@ if st.button("Run Genetic Algorithm"):
     
     st.table(table_data)
     st.success(f"✅ Total Ratings: {fitness_function(best_schedule):.2f}")
+
 
